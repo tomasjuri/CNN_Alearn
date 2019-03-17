@@ -169,6 +169,7 @@ class FCNAlearn(BaseModel):
                 tf.cast(correct_prediction, tf.float32))
 
             self.pred_masks = tf.nn.softmax(pred_masks, axis=3)
+            self.argmax_mask = tf.argmax(pred_masks, axis=3)
 
     def init_saver(self):
         # here you initialize the tensorflow saver that will be used in saving the checkpoints.
