@@ -4,9 +4,9 @@ import numpy as np
 import tensorflow as tf
 
 
-class ExampleTrainer(BaseTrain):
+class AsphaltTrainer(BaseTrain):
     def __init__(self, sess, model, data, config, logger):
-        super(ExampleTrainer, self).__init__(sess, model, data, config,logger)
+        super(AsphaltTrainer, self).__init__(sess, model, data, config,logger)
 
     def train_epoch(self):
         loop = tqdm(range(self.config.num_iter_per_epoch))

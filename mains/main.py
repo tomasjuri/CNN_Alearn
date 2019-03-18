@@ -2,7 +2,7 @@ import tensorflow as tf
 
 from data_loader.data_generator_asphalt import DataGeneratorAsphalt
 from models.fcn_alearn_model import FCNAlearn
-from trainers.example_trainer import ExampleTrainer
+from trainers.asphalt_trainer import AsphaltTrainer
 from utils.config import process_config
 from utils.dirs import create_dirs
 from utils.logger import Logger
@@ -35,7 +35,7 @@ def main():
     # create tensorboard logger
     logger = Logger(sess, config)
     # create trainer and pass all the previous components to it
-    trainer = ExampleTrainer(sess, model, data, config, logger)
+    trainer = AsphaltTrainer(sess, model, data, config, logger)
     #load model if exists
     sess.run(tf.global_variables_initializer())
     #model.load(sess)
