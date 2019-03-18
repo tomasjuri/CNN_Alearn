@@ -2,37 +2,41 @@ from base.base_model import BaseModel
 import tensorflow as tf
 from itertools import repeat
 
-# def bottleneck_layer(x, n_chan, use_projection=True):
-#     shortcut = x
+def bottleneck_layer(x, n_chan, is_training, use_projection=True):
+    shortcut = x
 
-#     if use_projection:
-#     # Projection shortcut in first layer to match filters and strides
-#         shortcut = tf.layers.conv2d(
-#             inputs=shortcut, filters=4*n_chan, kernel_size=[1, 1],
-#             padding="same", activation=None)
-#         #shortcut = tf.layers.batch_normalization(shortcut, training=self.is_training)
+    if use_projection:
+        # Projection shortcut in first layer to match filters and strides
+        shortcut = tf.layers.conv2d(
+            inputs=shortcut, filters=4*n_chan, kernel_size=[1, 1],
+            padding="same", activation=None)
+        
+        shortcut = tf.nn.relu(shortcut)
+        shortcut = tf.layers.batch_normalization(shortcut, training=is_training)
 
-#     #x = tf.layers.batch_normalization(x, training=self.is_training)
-#     x = tf.nn.relu(x)
-#     x = tf.layers.conv2d(
-#         inputs=x, filters=n_chan, kernel_size=[1, 1], padding="same",
-#         activation=None)
-
-#     #x = tf.layers.batch_normalization(x, training=self.is_training)
-#     x = tf.nn.relu(x)
-#     x = tf.layers.conv2d(
-#         inputs=x, filters=n_chan, kernel_size=[3, 3], padding="same",
-#         activation=None)
-
-#     #x = tf.layers.batch_normalization(x, training=self.is_training)
-#     x = tf.nn.relu(x)
-#     x = tf.layers.conv2d(
-#         inputs=x, filters=4*n_chan, kernel_size=[1, 1],
-#         padding="same", activation=None)
+    x = tf.nn.relu(x)
+    x = tf.layers.batch_normalization(x, training=is_training)
     
-#     x += shortcut
-#     #x = tf.layers.batch_normalization(x, training=self.is_training)
-#     return x
+    x = tf.layers.conv2d(
+        inputs=x, filters=n_chan, kernel_size=[1, 1], padding="same",
+        activation=None)
+
+    x = tf.nn.relu(x)
+    x = tf.layers.batch_normalization(x, training=is_training)
+    
+    x = tf.layers.conv2d(
+        inputs=x, filters=n_chan, kernel_size=[3, 3], padding="same",
+        activation=None)
+
+    x = tf.nn.relu(x)
+    x = tf.layers.batch_normalization(x, training=is_training)
+    
+    x = tf.layers.conv2d(
+        inputs=x, filters=4*n_chan, kernel_size=[1, 1],
+        padding="same", activation=None)
+    
+    x += shortcut
+    return x
 
 class FCNAlearn(BaseModel):
     def __init__(self, config):
@@ -52,7 +56,8 @@ class FCNAlearn(BaseModel):
                         strides=[2,2], kernel_size=[3,3], padding='same')
             f1 = tf.nn.relu(f1)
             f1 = tf.layers.batch_normalization(f1, training=self.is_training)            
-        
+            print('f1.shape: ', f1.shape)
+
         with tf.name_scope("features_2"):
             f2 = immediate_features['x2']
             f2 = tf.layers.conv2d_transpose(f2, filters=64,
@@ -63,9 +68,15 @@ class FCNAlearn(BaseModel):
                         strides=[2,2], kernel_size=[3,3], padding='same')
             f2 = tf.nn.relu(f2)
             f2 = tf.layers.batch_normalization(f2, training=self.is_training)
-        
+            print('f2.shape: ', f2.shape)
+
         with tf.name_scope("features_3"):
             f3 = immediate_features['x3']
+            f3 = tf.layers.conv2d_transpose(f3, filters=128,
+                        strides=[2,2], kernel_size=[3,3], padding='same')
+            f3 = tf.nn.relu(f3)
+            f3 = tf.layers.batch_normalization(f3, training=self.is_training)
+
             f3 = tf.layers.conv2d_transpose(f3, filters=64,
                         strides=[2,2], kernel_size=[3,3], padding='same')
             f3 = tf.nn.relu(f3)
@@ -75,12 +86,101 @@ class FCNAlearn(BaseModel):
                         strides=[2,2], kernel_size=[3,3], padding='same')
             f3 = tf.nn.relu(f3)
             f3 = tf.layers.batch_normalization(f3, training=self.is_training)
+            print('f3.shape: ', f3.shape)
+
+        with tf.name_scope("features_4"):
+            f4 = immediate_features['x4']
+            f4 = tf.layers.conv2d_transpose(f4, filters=256,
+                        strides=[2,2], kernel_size=[3,3], padding='same')
+            f4 = tf.nn.relu(f4)
+            f4 = tf.layers.batch_normalization(f4, training=self.is_training)
+
+            f4 = tf.layers.conv2d_transpose(f4, filters=128,
+                        strides=[2,2], kernel_size=[3,3], padding='same')
+            f4 = tf.nn.relu(f4)
+            f4 = tf.layers.batch_normalization(f4, training=self.is_training)
+
+            f4 = tf.layers.conv2d_transpose(f4, filters=64,
+                        strides=[2,2], kernel_size=[3,3], padding='same')
+            f4 = tf.nn.relu(f4)
+            f4 = tf.layers.batch_normalization(f4, training=self.is_training)
+
+            f4 = tf.layers.conv2d_transpose(f4, filters=32,
+                        strides=[2,2], kernel_size=[3,3], padding='same')
+            f4 = tf.nn.relu(f4)
+            f4 = tf.layers.batch_normalization(f4, training=self.is_training)
+            print('f4.shape: ', f4.shape)
+
+        with tf.name_scope("features_5"):
+            f5 = immediate_features['x5']
+            f5 = tf.layers.conv2d_transpose(f5, filters=256,
+                        strides=[2,2], kernel_size=[3,3], padding='same')
+            f5 = tf.nn.relu(f5)
+            f5 = tf.layers.batch_normalization(f5, training=self.is_training)
+
+            f5 = tf.layers.conv2d_transpose(f5, filters=128,
+                        strides=[2,2], kernel_size=[3,3], padding='same')
+            f5 = tf.nn.relu(f5)
+            f5 = tf.layers.batch_normalization(f5, training=self.is_training)
+
+            f5 = tf.layers.conv2d_transpose(f5, filters=64,
+                        strides=[2,2], kernel_size=[3,3], padding='same')
+            f5 = tf.nn.relu(f5)
+            f5 = tf.layers.batch_normalization(f5, training=self.is_training)
+
+            f5 = tf.layers.conv2d_transpose(f5, filters=32,
+                        strides=[2,2], kernel_size=[3,3], padding='same')
+            f5 = tf.nn.relu(f5)
+            f5 = tf.layers.batch_normalization(f5, training=self.is_training)
+
+            f5 = tf.layers.conv2d_transpose(f5, filters=32,
+                        strides=[2,2], kernel_size=[3,3], padding='same')
+            f5 = tf.nn.relu(f5)
+            f5 = tf.layers.batch_normalization(f5, training=self.is_training)
+            print('f5.shape: ', f5.shape)
+
+
+        with tf.name_scope("features_6"):
+            f6 = immediate_features['x6']
+            f6 = tf.layers.conv2d_transpose(f6, filters=256,
+                        strides=[2,2], kernel_size=[3,3], padding='same')
+            f6 = tf.nn.relu(f6)
+            f6 = tf.layers.batch_normalization(f6, training=self.is_training)
+
+            f6 = tf.layers.conv2d_transpose(f6, filters=128,
+                        strides=[2,2], kernel_size=[3,3], padding='same')
+            f6 = tf.nn.relu(f6)
+            f6 = tf.layers.batch_normalization(f6, training=self.is_training)
+
+            f6 = tf.layers.conv2d_transpose(f6, filters=64,
+                        strides=[2,2], kernel_size=[3,3], padding='same')
+            f6 = tf.nn.relu(f6)
+            f6 = tf.layers.batch_normalization(f6, training=self.is_training)
+
+            f6 = tf.layers.conv2d_transpose(f6, filters=32,
+                        strides=[2,2], kernel_size=[3,3], padding='same')
+            f6 = tf.nn.relu(f6)
+            f6 = tf.layers.batch_normalization(f6, training=self.is_training)
+
+            f6 = tf.layers.conv2d_transpose(f6, filters=32,
+                        strides=[2,2], kernel_size=[3,3], padding='same')
+            f6 = tf.nn.relu(f6)
+            f6 = tf.layers.batch_normalization(f6, training=self.is_training)
+
+            f6 = tf.layers.conv2d_transpose(f6, filters=32,
+                        strides=[2,2], kernel_size=[3,3], padding='same')
+            f6 = tf.nn.relu(f6)
+            f6 = tf.layers.batch_normalization(f6, training=self.is_training)
+            print('f6.shape: ', f6.shape)
 
         with tf.name_scope("features_combined"):
             mask = tf.zeros_like(f1)
             mask += f1
             mask += f2
             mask += f3
+            mask += f4
+            mask += f5
+            mask += f6
 
         with tf.name_scope("mask_conv_3x3"):
             mask = tf.layers.conv2d(
@@ -116,11 +216,11 @@ class FCNAlearn(BaseModel):
                 strides=[1, 1], padding="same", activation=None)
             x = tf.nn.relu(x)
             x = tf.layers.batch_normalization(x, training=self.is_training)
-            
+        
         with tf.name_scope("3_conv"):
             x = tf.layers.conv2d(
                 inputs=x, filters=32, kernel_size=[3, 3],
-                padding="same", strides=[1, 1], activation=None)
+                strides=[1, 1], padding="same", activation=None)
             x = tf.nn.relu(x)
             x = tf.layers.batch_normalization(x, training=self.is_training)
             immediate_features['x1'] = x
@@ -128,22 +228,57 @@ class FCNAlearn(BaseModel):
         with tf.name_scope("4_pooling"):
             x = tf.layers.max_pooling2d(
                 inputs=x, pool_size=[2, 2], strides=2)
-        
-        with tf.name_scope("5_conv"):
-            x = tf.layers.conv2d(
-                inputs=x, filters=64, kernel_size=[3, 3],
-                padding="same", strides=[1, 1], activation=None)
-            x = tf.nn.relu(x)
-            x = tf.layers.batch_normalization(x, training=self.is_training)
+    
+        with tf.name_scope("5_resnet"):
+            x = bottleneck_layer(x, 64, self.is_training)
+
+        with tf.name_scope("6_resnet"):
+            x = bottleneck_layer(x, 64, self.is_training)
             immediate_features['x2'] = x
-        
-        with tf.name_scope("6_conv"):
-            x = tf.layers.conv2d(
-                inputs=x, filters=128, kernel_size=[3, 3],
-                padding="same", strides=[1, 1], activation=None)
-            x = tf.nn.relu(x)
-            x = tf.layers.batch_normalization(x, training=self.is_training)
+
+        with tf.name_scope("7_pooling"):
+            x = tf.layers.max_pooling2d(
+                inputs=x, pool_size=[2, 2], strides=2)
+
+        with tf.name_scope("8_resnet"):
+            x = bottleneck_layer(x, 128, self.is_training)
+
+        with tf.name_scope("9_resnet"):
+            x = bottleneck_layer(x, 128, self.is_training)
             immediate_features['x3'] = x
+
+        with tf.name_scope("10_pooling"):
+            x = tf.layers.max_pooling2d(
+                inputs=x, pool_size=[2, 2], strides=2)
+
+        with tf.name_scope("11_resnet"):
+            x = bottleneck_layer(x, 256, self.is_training)
+
+        with tf.name_scope("12_resnet"):
+            x = bottleneck_layer(x, 256, self.is_training)
+            immediate_features['x4'] = x
+
+        with tf.name_scope("13_pooling"):
+            x = tf.layers.max_pooling2d(
+                inputs=x, pool_size=[2, 2], strides=2)
+
+        with tf.name_scope("14_resnet"):
+            x = bottleneck_layer(x, 256, self.is_training)
+
+        with tf.name_scope("15_resnet"):
+            x = bottleneck_layer(x, 256, self.is_training)
+            immediate_features['x5'] = x
+
+        with tf.name_scope("16_pooling"):
+            x = tf.layers.max_pooling2d(
+                inputs=x, pool_size=[2, 2], strides=2)
+
+        with tf.name_scope("17_resnet"):
+            x = bottleneck_layer(x, 256, self.is_training)
+
+        with tf.name_scope("18_resnet"):
+            x = bottleneck_layer(x, 256, self.is_training)
+            immediate_features['x6'] = x
 
         self.image_descriptor = tf.reduce_mean(x, axis=[1, 2])
         pred_masks = self.features_to_mask(immediate_features)
@@ -156,7 +291,7 @@ class FCNAlearn(BaseModel):
             cross_entropy = tf.nn.softmax_cross_entropy_with_logits_v2(
                 logits=flat_logits, labels=flat_labels)
             self.cross_entropy = tf.reduce_mean(cross_entropy, name='cross_entropy')
-            
+
             update_ops = tf.get_collection(tf.GraphKeys.UPDATE_OPS)
             with tf.control_dependencies(update_ops):    
                 self.train_step = tf.train.AdamOptimizer(
@@ -168,7 +303,7 @@ class FCNAlearn(BaseModel):
             self.accuracy = tf.reduce_mean(
                 tf.cast(correct_prediction, tf.float32))
 
-            self.pred_masks = tf.nn.softmax(pred_masks, axis=3)
+            self.pred_masks = tf.nn.softmax(pred_masks, axis=3)    
             self.argmax_mask = tf.argmax(pred_masks, axis=3)
 
     def init_saver(self):
