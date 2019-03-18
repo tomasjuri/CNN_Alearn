@@ -8,6 +8,8 @@ from utils.dirs import create_dirs
 from utils.logger import Logger
 from utils.utils import get_args
 
+import os
+os.environ["CUDA_VISIBLE_DEVICES"]="0,1,2"
 
 def main():
     # capture the config path from the run arguments
@@ -23,7 +25,9 @@ def main():
     # create the experiments dirs
     create_dirs([config.summary_dir, config.checkpoint_dir])
     # create tensorflow session
-    sess = tf.Session()
+    tf_config = tf.ConfigProto()
+    tf_config.gpu_options.allow_growth=True
+    sess = tf.Session(config=tf_config)
     # create your data generator
     data = DataGeneratorAsphalt(config)
 

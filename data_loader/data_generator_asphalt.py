@@ -32,8 +32,8 @@ class DataGeneratorAsphalt:
     def __init__(self, config):
         self.config = config
         
-        ann_h5 = config.ann_h5
-        img_h5 = config.img_h5
+        ann_h5 = self.config.ann_h5
+        img_h5 = self.config.img_h5
 
         with pd.HDFStore(ann_h5, mode="r") as hdf:
             self.ann_df = hdf[HDF_ANNOTATIONS]
