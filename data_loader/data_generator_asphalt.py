@@ -49,56 +49,38 @@ class DataGeneratorAsphalt:
         self.img_augs, self.mask_augs = self.init_augs()
 
     def init_augs(self):
-        seq_img = iaa.Sequential([
-            iaa.Fliplr(0.5), # horizontal flips
-            iaa.Crop(percent=(0, 0.1)), # random crops
-            # Small gaussian blur with random sigma between 0 and 0.5.
-            # But we only blur about 50% of all images.
-            iaa.Sometimes(0.5,
-                iaa.GaussianBlur(sigma=(0, 0.5))
-            ),
-            # Strengthen or weaken the contrast in each image.
-            #iaa.ContrastNormalization((0.75, 1.5)),
-            # Add gaussian noise.
-            # For 50% of all images, we sample the noise once per pixel.
-            # For the other 50% of all images, we sample the noise per pixel AND
-            # channel. This can change the color (not only brightness) of the
-            # pixels.
-            #iaa.AdditiveGaussianNoise(loc=0, scale=(0.0, 0.05*255), per_channel=0.5),
-            # Make some images brighter and some darker.
-            # In 20% of all cases, we sample the multiplier once per channel,
-            # which can end up changing the color of the images.
-            iaa.Multiply((0.8, 1.2), per_channel=0.2),
-            # Apply affine transformations to each image.
-            # Scale/zoom them, translate/move them, rotate them and shear them.
+        img_augs = [
+            iaa.Crop(percent=((0, 0.4), (0, 0.4), (0, 0.4), (0, 0.4))),
+            iaa.Fliplr(0.5),
+            iaa.Flipud(0.5),
+            iaa.Multiply((0.8, 1.2)),
             iaa.Affine(
+                rotate=(-30, 30),
                 scale={"x": (0.8, 1.2), "y": (0.8, 1.2)},
                 translate_percent={"x": (-0.2, 0.2), "y": (-0.2, 0.2)},
-                rotate=(-25, 25),
-                shear=(-8, 8)
             )
-        ], random_order=True) # apply augmenters in random order
-        
+        ]
+        seq_img = iaa.SomeOf(4, img_augs, random_order=True)        
         seq_img = seq_img.localize_random_state()
 
-        seq_mask = iaa.Sequential([
-            iaa.Fliplr(0.5), # horizontal flips
-            iaa.Crop(percent=(0, 0.1)), # random crops           
-            # Apply affine transformations to each image.
-            # Scale/zoom them, translate/move them, rotate them and shear them.
+        mask_augs = [
+            iaa.Crop(percent=((0, 0.4), (0, 0.4), (0, 0.4), (0, 0.4))),
+            iaa.Fliplr(0.5),
+            iaa.Flipud(0.5),
+            # iaa.Multiply((0.8, 1.2)),
             iaa.Affine(
+                rotate=(-30, 30),
                 scale={"x": (0.8, 1.2), "y": (0.8, 1.2)},
                 translate_percent={"x": (-0.2, 0.2), "y": (-0.2, 0.2)},
-                rotate=(-25, 25),
-                shear=(-8, 8)
             )
-        ], random_order=True) # apply augmenters in random order
+        ]
+        seq_mask = iaa.SomeOf(4, mask_augs, random_order=True)        
 
         return seq_img, seq_mask
 
     def augment_image(self, image, mask):
-        self.mask_augs = self.mask_augs.copy_random_state(self.img_augs, matching="name")
-        
+        self.mask_augs = self.mask_augs.copy_random_state(
+            self.img_augs, matching="name")
         self.mask_augs = self.mask_augs.to_deterministic()
         self.img_augs = self.img_augs.to_deterministic()
 
@@ -138,7 +120,8 @@ class DataGeneratorAsphalt:
         
         crop_shape = self.config.img_size
         img, mask = random_crop(img, mask, crop_shape)
-        #img, mask = self.augment_image(img.astype(np.float32), mask.astype(np.float32))
+        img, mask = self.augment_image(
+            img.astype(np.float32), mask.astype(np.float32))
 
         return img.astype(np.float32), mask.astype(np.float32)
 
