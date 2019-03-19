@@ -35,7 +35,6 @@ class AsphaltTrainer(BaseTrain):
             'x': x,
             'y': imgs['y_0'],
             'pred_mask_0': imgs['pred_mask_0'],
-            'pred_mask_1': imgs['pred_mask_1'],
             'argmax_mask': imgs['argmax_mask'],
         }
 
@@ -54,7 +53,6 @@ class AsphaltTrainer(BaseTrain):
             'x': x,
             'y': imgs['y_0'],
             'pred_mask_0': imgs['pred_mask_0'],
-            'pred_mask_1': imgs['pred_mask_1'],
             'argmax_mask': imgs['argmax_mask'],
         }
         
