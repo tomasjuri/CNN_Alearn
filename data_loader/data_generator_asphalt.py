@@ -4,6 +4,7 @@ import cv2
 import pandas as pd
 import os
 import imgaug as ia
+import imgaug
 from imgaug import augmenters as iaa
 from sklearn.cross_validation import train_test_split
 
@@ -49,10 +50,10 @@ class DataGeneratorAsphalt:
             ann_imgids, test_size=config.test_size,
             random_state=config.seed)
 
-        self.img_augs, self.mask_augs = self.init_augs()
+        self.augs = self.init_augs()
 
     def init_augs(self):
-        img_augs = [
+        augs = [
             iaa.Crop(percent=((0, 0.4), (0, 0.4), (0, 0.4), (0, 0.4))),
             iaa.Fliplr(0.5),
             iaa.Flipud(0.5),
@@ -63,33 +64,29 @@ class DataGeneratorAsphalt:
                 translate_percent={"x": (-0.2, 0.2), "y": (-0.2, 0.2)},
             )
         ]
-        seq_img = iaa.SomeOf(4, img_augs, random_order=True)        
-        seq_img = seq_img.localize_random_state()
-
-        mask_augs = [
-            iaa.Crop(percent=((0, 0.4), (0, 0.4), (0, 0.4), (0, 0.4))),
-            iaa.Fliplr(0.5),
-            iaa.Flipud(0.5),
-            # iaa.Multiply((0.8, 1.2)),
-            iaa.Affine(
-                rotate=(-30, 30),
-                scale={"x": (0.8, 1.2), "y": (0.8, 1.2)},
-                translate_percent={"x": (-0.2, 0.2), "y": (-0.2, 0.2)},
-            )
-        ]
-        seq_mask = iaa.SomeOf(4, mask_augs, random_order=True)        
-
-        return seq_img, seq_mask
+        seq = iaa.SomeOf(4, augs, random_order=True)        
+        
+        return seq
 
     def augment_image(self, image, mask):
-        self.mask_augs = self.mask_augs.copy_random_state(
-            self.img_augs, matching="name")
-        self.mask_augs = self.mask_augs.to_deterministic()
-        self.img_augs = self.img_augs.to_deterministic()
+        MASK_AUGMENTERS = ["Sequential", "SomeOf", "OneOf", "Sometimes",
+                           "Fliplr", "Flipud", "CropAndPad",
+                           "Affine", "PiecewiseAffine"]
 
-        image = self.img_augs.augment_image(image)
-        mask = self.mask_augs.augment_image(mask)
-        return image, mask
+        def hook(images, augmenter, parents, default):
+            """Determines which augmenters to apply to masks."""
+            return augmenter.__class__.__name__ in MASK_AUGMENTERS
+
+        # Store shapes before augmentation to compare
+        image_shape = image.shape
+        mask_shape = mask.shape
+        # Make augmenters deterministic to apply similarly to images and masks
+        det = self.augs.to_deterministic()
+        image = det.augment_image(image)
+        mask = det.augment_image(mask.astype(np.uint8),
+                                 hooks=imgaug.HooksImages(activator=hook))
+        
+        return image, mask.astype(np.bool)
 
     def get_img(self, mode):
         img_size = self.config.img_size
