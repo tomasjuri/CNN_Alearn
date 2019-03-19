@@ -5,6 +5,7 @@ import pandas as pd
 import os
 import imgaug as ia
 from imgaug import augmenters as iaa
+from sklearn.cross_validation import train_test_split
 
 from shutil import copyfile
 
@@ -43,8 +44,10 @@ class DataGeneratorAsphalt:
         self.img_dirname = os.path.dirname(img_h5)
         self.mask_dirname = os.path.dirname(ann_h5)
 
-        self.ann_imgids = self.ann_df[DF_IMAGE_ID].unique()
-        # self.imgids = self.img_df[DF_IMAGE_ID].unique()
+        ann_imgids = self.ann_df[DF_IMAGE_ID].unique()
+        self.ann_imgids_train, self.ann_imgids_test = train_test_split(
+            ann_imgids, test_size=config.test_size,
+            random_state=config.seed)
 
         self.img_augs, self.mask_augs = self.init_augs()
 
@@ -88,11 +91,16 @@ class DataGeneratorAsphalt:
         mask = self.mask_augs.augment_image(mask)
         return image, mask
 
-    def get_img(self):
+    def get_img(self, mode):
         img_size = self.config.img_size
 
         # get random img id
-        img_id = random.choice(self.ann_imgids)
+        if mode == 'train':
+            img_id = random.choice(self.ann_imgids_train)
+        elif mode == 'test':
+            img_id = random.choice(self.ann_imgids_test)
+        else:
+            raise KeyError
 
         img_path_rel = getattr(self.img_df[
             self.img_df[DF_IMAGE_ID] == img_id], DF_IMG_PATH).values[0]
@@ -125,11 +133,11 @@ class DataGeneratorAsphalt:
 
         return img.astype(np.float32), mask.astype(np.float32)
 
-    def next_batch(self, batch_size):
+    def next_batch(self, batch_size, mode='train'):
         y = []
         x = []
         for _ in range(batch_size):
-            img, mask = self.get_img()
+            img, mask = self.get_img(mode=mode)
             y.append(mask)
             x.append(img)
 
