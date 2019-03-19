@@ -44,10 +44,6 @@ class FCNAlearn(BaseModel):
         self.n_class = self.config.n_classes
         self.build_model()
         self.init_saver()
-        self.init_variables()
-
-    def init_variables(self):
-        pass
 
     def features_to_mask(self, immediate_features, n_classes=2):      
         with tf.name_scope("features_1"):
@@ -56,7 +52,6 @@ class FCNAlearn(BaseModel):
                         strides=[2,2], kernel_size=[3,3], padding='same')
             f1 = tf.nn.relu(f1)
             f1 = tf.layers.batch_normalization(f1, training=self.is_training)            
-            print('f1.shape: ', f1.shape)
 
         with tf.name_scope("features_2"):
             f2 = immediate_features['x2']
@@ -68,7 +63,6 @@ class FCNAlearn(BaseModel):
                         strides=[2,2], kernel_size=[3,3], padding='same')
             f2 = tf.nn.relu(f2)
             f2 = tf.layers.batch_normalization(f2, training=self.is_training)
-            print('f2.shape: ', f2.shape)
 
         with tf.name_scope("features_3"):
             f3 = immediate_features['x3']
@@ -86,7 +80,6 @@ class FCNAlearn(BaseModel):
                         strides=[2,2], kernel_size=[3,3], padding='same')
             f3 = tf.nn.relu(f3)
             f3 = tf.layers.batch_normalization(f3, training=self.is_training)
-            print('f3.shape: ', f3.shape)
 
         with tf.name_scope("features_4"):
             f4 = immediate_features['x4']
@@ -109,7 +102,6 @@ class FCNAlearn(BaseModel):
                         strides=[2,2], kernel_size=[3,3], padding='same')
             f4 = tf.nn.relu(f4)
             f4 = tf.layers.batch_normalization(f4, training=self.is_training)
-            print('f4.shape: ', f4.shape)
 
         with tf.name_scope("features_5"):
             f5 = immediate_features['x5']
@@ -137,8 +129,6 @@ class FCNAlearn(BaseModel):
                         strides=[2,2], kernel_size=[3,3], padding='same')
             f5 = tf.nn.relu(f5)
             f5 = tf.layers.batch_normalization(f5, training=self.is_training)
-            print('f5.shape: ', f5.shape)
-
 
         with tf.name_scope("features_6"):
             f6 = immediate_features['x6']
@@ -171,16 +161,12 @@ class FCNAlearn(BaseModel):
                         strides=[2,2], kernel_size=[3,3], padding='same')
             f6 = tf.nn.relu(f6)
             f6 = tf.layers.batch_normalization(f6, training=self.is_training)
-            print('f6.shape: ', f6.shape)
 
         with tf.name_scope("features_combined"):
             mask = tf.zeros_like(f1)
-            mask += f1
-            mask += f2
-            mask += f3
-            mask += f4
-            mask += f5
-            mask += f6
+            fs = [f1, f2, f3, f4, f5, f6]
+            for f in fs:
+                mask += f
 
         with tf.name_scope("mask_conv_3x3"):
             mask = tf.layers.conv2d(
