@@ -7,9 +7,9 @@ from utils.config import process_config
 from utils.dirs import create_dirs
 from utils.logger import Logger
 from utils.utils import get_args
+import logging
 
-import os
-os.environ["CUDA_VISIBLE_DEVICES"]="0,1,2"
+logging.basicConfig(level=logging.DEBUG)
 
 def main():
     # capture the config path from the run arguments
@@ -33,8 +33,7 @@ def main():
 
     # create an instance of the model you want
     model = FCNAlearn(config)
-    print('model created')
-    
+    logging.debug('Model created')  
     
     # create tensorboard logger
     logger = Logger(sess, config)
