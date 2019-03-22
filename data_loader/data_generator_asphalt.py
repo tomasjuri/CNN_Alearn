@@ -20,6 +20,7 @@ DF_MASK_PATH = 'mask_path'
 class DataGeneratorAsphalt:
     def __init__(self, config, apply_augs=True):
         self.config = config
+        self.init_seeds()
         self.apply_augs = apply_augs
         
         ann_h5 = self.config.ann_h5
@@ -39,6 +40,11 @@ class DataGeneratorAsphalt:
             random_state=config.seed)
 
         self.augs = self.init_augs()
+
+    def init_seeds(self):
+        ia.seed(self.config.seed)
+        random.seed(self.config.seed)
+        np.random.seed(self.config.seed)
 
     def random_crop(self, img, mask, crop_shape):
         shp = img.shape

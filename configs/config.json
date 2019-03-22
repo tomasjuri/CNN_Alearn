@@ -1,5 +1,5 @@
 {
-  "exp_name": "/srv/workplace/tjurica/cnn_experiments/example_18",
+  "exp_name": "/srv/workplace/tjurica/cnn_experiments/example_32",
   "num_epochs": 1000,
   "num_iter_per_epoch": 500,
   "num_evals_per_epoch": 5,
@@ -10,6 +10,7 @@
   "max_to_keep":5,
   "n_classes":2,
   "test_size":0.3,
+  "seed":42,
   
   "img_h5": "/srv/workplace/tjurica/asphalt_cnn_alearn/asphalt-images.h5",
   "ann_h5": "/srv/workplace/tjurica/asphalt_cnn_alearn/asphalt-annotations-updated.h5"

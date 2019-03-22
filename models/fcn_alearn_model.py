@@ -6,6 +6,7 @@ class FCNAlearn(BaseModel):
     def __init__(self, config):
         super(FCNAlearn, self).__init__(config)
         self.n_class = self.config.n_classes
+        tf.set_random_seed(self.config.seed)
         self.build_model()
         self.init_saver()
 

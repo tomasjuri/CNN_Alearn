@@ -26,6 +26,7 @@ def main():
     create_dirs([config.summary_dir, config.checkpoint_dir])
     
     # create tensorflow session
+    tf.set_random_seed(config.seed)
     tf_config = tf.ConfigProto() #device_count = {'GPU': 2})
     tf_config.gpu_options.allow_growth=True
     sess = tf.Session(config=tf_config)
