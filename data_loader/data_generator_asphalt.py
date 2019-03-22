@@ -118,37 +118,12 @@ class DataGeneratorAsphalt:
         
         crop_shape = self.config.img_size
         img, mask = random_crop(img, mask, crop_shape)
-
-        # print('before aug, img.min(): ', img.min())
-        # print('before aug, img.max(): ', img.max())
-        # print('before aug, img.dtype: ', img.dtype)
-        # print('before aug, img.shape: ', img.shape)        
-
-        # print('before aug, mask.min(): ', mask.min())
-        # print('before aug, mask.max(): ', mask.max())
-        # print('before aug, mask.dtype: ', mask.dtype)
-        # print('before aug, mask.shape: ', mask.shape)
         
         img, mask = self.augment_image(
             img.astype(np.float32), mask.astype(np.float32))
         
         mask_cls2 = np.ones_like(mask) - mask
         mask = np.concatenate((mask, mask_cls2), axis=2)
-
-        # print(' ')
-        # print(' ')
-        # print(' ')
-
-        # print('after aug, img.min(): ', img.min())
-        # print('after aug, img.max(): ', img.max())
-        # print('after aug, img.dtype: ', img.dtype)
-        # print('after aug, img.shape: ', img.shape)        
-
-        # print('after aug, mask.min(): ', mask.min())
-        # print('after aug, mask.max(): ', mask.max())
-        # print('after aug, mask.dtype: ', mask.dtype)
-        # print('after aug, mask.shape: ', mask.shape)
-        # #exit(0)
 
         return img.astype(np.float32), mask.astype(np.float32)
 
