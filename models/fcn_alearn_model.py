@@ -2,48 +2,49 @@ from base.base_model import BaseModel
 import tensorflow as tf
 from itertools import repeat
 
-def bottleneck_layer(x, n_chan, is_training, use_projection=True):
-    shortcut = x
-
-    if use_projection:
-        # Projection shortcut in first layer to match filters and strides
-        shortcut = tf.layers.conv2d(
-            inputs=shortcut, filters=4*n_chan, kernel_size=[1, 1],
-            padding="same", activation=None)
-        
-        shortcut = tf.nn.relu(shortcut)
-        shortcut = tf.layers.batch_normalization(shortcut, training=is_training)
-
-    x = tf.nn.relu(x)
-    x = tf.layers.batch_normalization(x, training=is_training)
-    
-    x = tf.layers.conv2d(
-        inputs=x, filters=n_chan, kernel_size=[1, 1], padding="same",
-        activation=None)
-
-    x = tf.nn.relu(x)
-    x = tf.layers.batch_normalization(x, training=is_training)
-    
-    x = tf.layers.conv2d(
-        inputs=x, filters=n_chan, kernel_size=[3, 3], padding="same",
-        activation=None)
-
-    x = tf.nn.relu(x)
-    x = tf.layers.batch_normalization(x, training=is_training)
-    
-    x = tf.layers.conv2d(
-        inputs=x, filters=4*n_chan, kernel_size=[1, 1],
-        padding="same", activation=None)
-    
-    x += shortcut
-    return x
-
 class FCNAlearn(BaseModel):
     def __init__(self, config):
         super(FCNAlearn, self).__init__(config)
         self.n_class = self.config.n_classes
         self.build_model()
         self.init_saver()
+
+    def bottleneck_layer(self, x, n_chan, is_training, use_projection=True):
+        shortcut = x
+
+        if use_projection:
+            # Projection shortcut in first layer to match filters and strides
+            shortcut = tf.layers.conv2d(
+                inputs=shortcut, filters=4*n_chan, kernel_size=[1, 1],
+                padding="same", activation=None)
+            
+            shortcut = tf.nn.relu(shortcut)
+            shortcut = tf.layers.batch_normalization(shortcut, training=is_training)
+
+        x = tf.nn.relu(x)
+        x = tf.layers.batch_normalization(x, training=is_training)
+        
+        x = tf.layers.conv2d(
+            inputs=x, filters=n_chan, kernel_size=[1, 1], padding="same",
+            activation=None)
+
+        x = tf.nn.relu(x)
+        x = tf.layers.batch_normalization(x, training=is_training)
+        
+        x = tf.layers.conv2d(
+            inputs=x, filters=n_chan, kernel_size=[3, 3], padding="same",
+            activation=None)
+
+        x = tf.nn.relu(x)
+        x = tf.layers.batch_normalization(x, training=is_training)
+        
+        x = tf.layers.conv2d(
+            inputs=x, filters=4*n_chan, kernel_size=[1, 1],
+            padding="same", activation=None)
+        
+        x += shortcut
+        return x
+
 
     def features_to_mask(self, immediate_features, n_classes=2):      
         with tf.name_scope("features_1"):
@@ -216,10 +217,10 @@ class FCNAlearn(BaseModel):
                 inputs=x, pool_size=[2, 2], strides=2)
     
         with tf.name_scope("5_resnet"):
-            x = bottleneck_layer(x, 64, self.is_training)
+            x = self.bottleneck_layer(x, 64, self.is_training)
 
         with tf.name_scope("6_resnet"):
-            x = bottleneck_layer(x, 64, self.is_training)
+            x = self.bottleneck_layer(x, 64, self.is_training)
             immediate_features['x2'] = x
 
         with tf.name_scope("7_pooling"):
@@ -227,10 +228,10 @@ class FCNAlearn(BaseModel):
                 inputs=x, pool_size=[2, 2], strides=2)
 
         with tf.name_scope("8_resnet"):
-            x = bottleneck_layer(x, 128, self.is_training)
+            x = self.bottleneck_layer(x, 128, self.is_training)
 
         with tf.name_scope("9_resnet"):
-            x = bottleneck_layer(x, 128, self.is_training)
+            x = self.bottleneck_layer(x, 128, self.is_training)
             immediate_features['x3'] = x
 
         with tf.name_scope("10_pooling"):
@@ -238,10 +239,10 @@ class FCNAlearn(BaseModel):
                 inputs=x, pool_size=[2, 2], strides=2)
 
         with tf.name_scope("11_resnet"):
-            x = bottleneck_layer(x, 256, self.is_training)
+            x = self.bottleneck_layer(x, 256, self.is_training)
 
         with tf.name_scope("12_resnet"):
-            x = bottleneck_layer(x, 256, self.is_training)
+            x = self.bottleneck_layer(x, 256, self.is_training)
             immediate_features['x4'] = x
 
         with tf.name_scope("13_pooling"):
@@ -249,10 +250,10 @@ class FCNAlearn(BaseModel):
                 inputs=x, pool_size=[2, 2], strides=2)
 
         with tf.name_scope("14_resnet"):
-            x = bottleneck_layer(x, 256, self.is_training)
+            x = self.bottleneck_layer(x, 256, self.is_training)
 
         with tf.name_scope("15_resnet"):
-            x = bottleneck_layer(x, 256, self.is_training)
+            x = self.bottleneck_layer(x, 256, self.is_training)
             immediate_features['x5'] = x
 
         with tf.name_scope("16_pooling"):
@@ -260,10 +261,10 @@ class FCNAlearn(BaseModel):
                 inputs=x, pool_size=[2, 2], strides=2)
 
         with tf.name_scope("17_resnet"):
-            x = bottleneck_layer(x, 256, self.is_training)
+            x = self.bottleneck_layer(x, 256, self.is_training)
 
         with tf.name_scope("18_resnet"):
-            x = bottleneck_layer(x, 256, self.is_training)
+            x = self.bottleneck_layer(x, 256, self.is_training)
             immediate_features['x6'] = x
 
         self.image_descriptor = tf.reduce_mean(x, axis=[1, 2])
