@@ -109,3 +109,4 @@ Tensorflow-Project-Template-master.zip
 docker/ssh/id_rsa
 figures/diagram.png
 LICENSE
+*.png
