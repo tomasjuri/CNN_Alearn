@@ -24,10 +24,12 @@ def main():
 
     # create the experiments dirs
     create_dirs([config.summary_dir, config.checkpoint_dir])
+    
     # create tensorflow session
-    tf_config = tf.ConfigProto()
+    tf_config = tf.ConfigProto() #device_count = {'GPU': 2})
     tf_config.gpu_options.allow_growth=True
     sess = tf.Session(config=tf_config)
+    
     # create your data generator
     data = DataGeneratorAsphalt(config)
 
@@ -42,7 +44,7 @@ def main():
     #load model if exists
     sess.run(tf.global_variables_initializer())
     #model.load(sess)
-    # here you train your model
+
     trainer.train()
 
 
