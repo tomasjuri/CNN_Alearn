@@ -17,22 +17,10 @@ DF_IMAGE_ID = 'image_id'
 DF_IMG_PATH = 'src_image_path'
 DF_MASK_PATH = 'mask_path'
 
-def random_crop(img, mask, crop_shape):
-    shp = img.shape
-    start = [random.randint(0, shp[0] - crop_shape[0]),
-             random.randint(0, shp[1] - crop_shape[1])]
-    end = [start[0] + crop_shape[0],
-           start[1] + crop_shape[1]]
-             
-    img_cropped = img[start[0]:end[0], start[1]:end[1],:]
-    mask_cropped = mask[start[0]:end[0], start[1]:end[1],:]
-
-    return img_cropped, mask_cropped
-
-
 class DataGeneratorAsphalt:
-    def __init__(self, config):
+    def __init__(self, config, apply_augs=True):
         self.config = config
+        self.apply_augs = apply_augs
         
         ann_h5 = self.config.ann_h5
         img_h5 = self.config.img_h5
@@ -52,6 +40,18 @@ class DataGeneratorAsphalt:
 
         self.augs = self.init_augs()
 
+    def random_crop(self, img, mask, crop_shape):
+        shp = img.shape
+        start = [random.randint(0, shp[0] - crop_shape[0]),
+                random.randint(0, shp[1] - crop_shape[1])]
+        end = [start[0] + crop_shape[0],
+            start[1] + crop_shape[1]]
+                
+        img_cropped = img[start[0]:end[0], start[1]:end[1],:]
+        mask_cropped = mask[start[0]:end[0], start[1]:end[1],:]
+
+        return img_cropped, mask_cropped
+        
     def init_augs(self):
         augs = [
             iaa.Crop(percent=((0, 0.4), (0, 0.4), (0, 0.4), (0, 0.4))),
@@ -117,10 +117,11 @@ class DataGeneratorAsphalt:
         img = img[:, :, np.newaxis]
         
         crop_shape = self.config.img_size
-        img, mask = random_crop(img, mask, crop_shape)
+        img, mask = self.random_crop(img, mask, crop_shape)
         
-        img, mask = self.augment_image(
-            img.astype(np.float32), mask.astype(np.float32))
+        if self.apply_augs:
+            img, mask = self.augment_image(
+                img.astype(np.float32), mask.astype(np.float32))
         
         mask_cls2 = np.ones_like(mask) - mask
         mask = np.concatenate((mask, mask_cls2), axis=2)

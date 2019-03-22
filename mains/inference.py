@@ -30,23 +30,13 @@ def main():
     args = parse_args()
     config = process_config(args.config)
 
-<<<<<<< HEAD
     tf.set_random_seed(config.seed)
     tf_config = tf.ConfigProto()
     tf_config.gpu_options.allow_growth=True
     sess = tf.Session(config=tf_config)
 
-    
     # create your data generator
     data = DataGeneratorAsphalt(config, apply_augs=False)
-=======
-    tf_config = tf.ConfigProto()
-    tf_config.gpu_options.allow_growth=True
-    sess = tf.Session(config=tf_config)
-    
-    # create your data generator
-    data = DataGeneratorAsphalt(config)
->>>>>>> f8c084e... Add inference script
 
     # create an instance of the model
     model = FCNAlearn(config)
@@ -63,9 +53,8 @@ def main():
 
     print('accuracy: ', accuracy)
     print('pred_masks.shape: ', pred_masks.shape)
-
-<<<<<<< HEAD
     print('batch_y.shape: ', batch_y.shape)
+
     for i in range(pred_masks.shape[0]):
         x = batch_x[i, ...]*255.0
 
@@ -83,21 +72,6 @@ def main():
         cv2.imwrite(filename_x, x.astype(np.uint8))
         cv2.imwrite(filename_y, y_0.astype(np.uint8))
         cv2.imwrite(filename_mask, pred_mask_0.astype(np.uint8))
-=======
-    for i in range(pred_masks.shape[0]):
-        pred_mask = pred_masks[i, ...]
-        pred_mask = pred_mask*255.0
-        pred_mask = pred_mask.astype(np.uint8)
-        pred_mask_0, pred_mask_1 = np.split(pred_mask, 2, axis=2)
-
-        filename = 'outputs/mask_{}.png'.format(str(i))
-        import os
-        cwd = os.getcwd()
-        print(cwd)
-        print('saving: ', filename)
-        cv2.imwrite(filename, pred_mask_0)
->>>>>>> f8c084e... Add inference script
-
 
 if __name__ == '__main__':
     main()
