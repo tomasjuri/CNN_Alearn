@@ -39,4 +39,5 @@ RUN python3 -m pip install scikit-image \
     tables \
     ipympl \
     tqdm \
-    bunch
+    bunch \
+    jupyter
