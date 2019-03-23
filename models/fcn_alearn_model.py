@@ -298,3 +298,9 @@ class FCNAlearn(BaseModel):
         # here you initialize the tensorflow saver that will be used in saving the checkpoints.
         self.saver = tf.train.Saver(max_to_keep=self.config.max_to_keep)
 
+    def inference(self, session, batch_x):
+        feed_dict = {self.x: batch_x, self.is_training: False}    
+        pred_masks = session.run([self.pred_masks], feed_dict=feed_dict)
+        return pred_masks
+
+
