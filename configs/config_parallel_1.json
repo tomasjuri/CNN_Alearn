@@ -1,0 +1,17 @@
+{
+  "exp_name": "/srv/workplace/tjurica/cnn_experiments/parallel/run_1",
+  "num_epochs": 40,
+  "num_iter_per_epoch": 500,
+  "num_evals_per_epoch": 5,
+  "learning_rate": 0.001,
+  "batch_size": 2,
+  "img_size": [512, 512, 1],
+  "mask_size": [512, 512, 2],
+  "max_to_keep":5,
+  "n_classes":2,
+  "test_size":0.5,
+  "seed":43,
+  
+  "img_h5": "/srv/workplace/tjurica/asphalt_cnn_alearn/asphalt-images.h5",
+  "ann_h5": "/srv/workplace/tjurica/asphalt_cnn_alearn/asphalt-annotations-updated.h5"
+}
